@@ -31,4 +31,14 @@ public class MemberWriteService {
         System.out.println("======service Member create===========");
         return memberRepository.save(member);
     }
+
+    public void changeNickname(Long memberId, String nickname){
+        /*
+            1. 회원의 이름을 변경
+            2. 변경 내역을 저장한다.
+         */
+        var member = memberRepository.findById(memberId).orElseThrow();
+        member.changeName(nickname);
+        memberRepository.save(member);
+    }
 }

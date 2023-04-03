@@ -17,6 +17,6 @@ public class MemberReadService {
     }
 
     public MemberDto toDto(Member member) {
-        return new MemberDto(member.getId(), member.getEmail(),member.getNickname(), member.getBirthday() )
+        return new MemberDto(member.getId(), member.getEmail(),member.getNickname(), member.getBirthday() );
     }
 }
