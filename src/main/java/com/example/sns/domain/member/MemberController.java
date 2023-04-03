@@ -25,4 +25,12 @@ public class MemberController {
     public MemberDto getMember(@PathVariable Long id){
         return memberReadService.getMember(id);
     }
+
+    @PostMapping("/members/{id}/name")
+    public MemberDto updateMember(@PathVariable Long id, @RequestBody String nickname) {
+        memberWriteService.changeNickname(id, nickname);
+        return memberReadService.getMember(id);
+    }
+
+
 }
