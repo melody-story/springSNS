@@ -1,6 +1,7 @@
 package com.example.sns.domain.member;
 
 import com.example.sns.domain.member.dto.MemberDto;
+import com.example.sns.domain.member.dto.MemberNicknameHistoryDto;
 import com.example.sns.domain.member.dto.RegisterMemberCommand;
 import com.example.sns.domain.member.entity.Member;
 import com.example.sns.domain.member.service.MemberReadService;
@@ -8,6 +9,8 @@ import com.example.sns.domain.member.service.MemberWriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +33,11 @@ public class MemberController {
     public MemberDto updateMember(@PathVariable Long id, @RequestBody String nickname) {
         memberWriteService.changeNickname(id, nickname);
         return memberReadService.getMember(id);
+    }
+
+    @GetMapping("/{memberId}/nickname-histories")
+    public List<MemberNicknameHistoryDto> getNicknameHistories(@PathVariable Long memberId) {
+        return memberReadService.getMemberNicknameHistories(memberId);
     }
 
 
