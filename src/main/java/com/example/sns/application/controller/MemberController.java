@@ -1,4 +1,4 @@
-package com.example.sns.domain.member;
+package com.example.sns.application.controller;
 
 import com.example.sns.domain.member.dto.MemberDto;
 import com.example.sns.domain.member.dto.MemberNicknameHistoryDto;
