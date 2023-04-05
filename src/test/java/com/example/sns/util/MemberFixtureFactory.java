@@ -1,4 +1,4 @@
-package com.example.sns.domain.member.util;
+package com.example.sns.util;
 
 import com.example.sns.domain.member.entity.Member;
 import org.jeasy.random.EasyRandom;

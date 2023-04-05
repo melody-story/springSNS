@@ -1,14 +1,10 @@
 package com.example.sns.domain.member;
 
 import com.example.sns.domain.member.entity.Member;
-import com.example.sns.domain.member.util.MemberFixtureFactory;
+import com.example.sns.util.MemberFixtureFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 public class MemberTest {
     @Test
@@ -30,12 +26,12 @@ public class MemberTest {
     public void testNicknameMaxLength() throws Exception {
         //given
         Member member = MemberFixtureFactory.create();
-        String overMaxLengthhName = "MelodyMelodyMelodyMelodyMelody";
+        String overMaxLengthName = "MelodyMelodyMelodyMelodyMelody";
 
         //when
         Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> member.changeName(overMaxLengthhName)
+                () -> member.changeName(overMaxLengthName)
         );
 
         //then
