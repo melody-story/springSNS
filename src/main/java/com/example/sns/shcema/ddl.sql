@@ -52,3 +52,4 @@ create index POST__index_created_date
 
 
 
+select count(id) from POST;
