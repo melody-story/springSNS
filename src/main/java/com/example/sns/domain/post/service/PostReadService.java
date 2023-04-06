@@ -2,8 +2,11 @@ package com.example.sns.domain.post.service;
 
 import com.example.sns.domain.post.dto.DailyPostCount;
 import com.example.sns.domain.post.dto.DailyPostCountRequest;
+import com.example.sns.domain.post.entity.Post;
 import com.example.sns.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,5 +26,10 @@ public class PostReadService  {
              group by createdDate memberId
          */
         return postRepository.groupByCreatedDate(request);
+    }
+
+    public Page<Post> getPosts(Long memberId, PageRequest pageRequest) {
+         return postRepository.findAllByMemberId(memberId,pageRequest);
+
     }
 }
