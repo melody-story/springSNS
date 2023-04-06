@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,10 +35,9 @@ public class PostController {
     @GetMapping("/members/{memberId}")
     public Page<Post> getPosts(
             @PathVariable Long memberId,
-            @RequestParam Integer page,
-            @RequestParam Integer size
+           Pageable pageable
     ) {
-        return postReadService.getPosts(memberId, PageRequest.of(page, size));
+        return postReadService.getPosts(memberId, pageable);
     }
 
 
