@@ -76,3 +76,10 @@ order by 2 desc ;
 explain select count(distinct createdDate)
 from POST;
 
+select *
+from POST
+where memberId = 4 and id > 1000;
+
+select *
+from POST
+where memberId = 4;

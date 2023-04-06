@@ -4,6 +4,8 @@ import com.example.sns.domain.post.dto.DailyPostCount;
 import com.example.sns.domain.post.dto.DailyPostCountRequest;
 import com.example.sns.domain.post.entity.Post;
 import com.example.sns.domain.post.repository.PostRepository;
+import com.example.sns.util.CursorRequest;
+import com.example.sns.util.PageCursor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,10 @@ public class PostReadService  {
 
     public Page<Post> getPosts(Long memberId, Pageable pageRequest) {
          return postRepository.findAllByMemberId(memberId,pageRequest);
+
+    }
+
+    public PageCursor<Post> getPosts(Long memberId, CursorRequest cursorRequest) {
 
     }
 }

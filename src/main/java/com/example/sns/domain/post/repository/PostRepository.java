@@ -1,6 +1,6 @@
 package com.example.sns.domain.post.repository;
 
-import com.example.sns.domain.PageHelper;
+import com.example.sns.util.PageHelper;
 import com.example.sns.domain.post.dto.DailyPostCount;
 import com.example.sns.domain.post.dto.DailyPostCountRequest;
 import com.example.sns.domain.post.entity.Post;
@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -80,6 +81,41 @@ public class PostRepository {
                 """,TABLE);
        var params = new MapSqlParameterSource().addValue("memberId", memberId);
        return namedParameterJdbcTemplate.queryForObject(sql, params,Long.class);
+    }
+
+    public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
+        /* 키가  없을 때
+         커서 방식에서는 사용하는 키와 정렬순서를 명시해주어야한다.
+         */
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId = :memberId
+                ORDER BY id DESC
+                LIMIT :size
+                """,TABLE);
+        var params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+    }
+
+    public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
+        /*
+         키가 있을 때
+         */
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId = :memberId and id > 
+                ORDER BY id DESC
+                LIMIT :size
+                """,TABLE);
+        var params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+
     }
 
     public Post save(Post post) {
