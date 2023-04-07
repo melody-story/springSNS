@@ -107,12 +107,13 @@ public class PostRepository {
         var sql = String.format("""
                 SELECT *
                 FROM %s
-                WHERE memberId = :memberId and id > 
+                WHERE memberId = :memberId and id < :id
                 ORDER BY id DESC
                 LIMIT :size
                 """,TABLE);
         var params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
+                .addValue("id", id)
                 .addValue("size", size);
         return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
 

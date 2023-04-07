@@ -6,6 +6,8 @@ import com.example.sns.domain.post.dto.PostCommand;
 import com.example.sns.domain.post.entity.Post;
 import com.example.sns.domain.post.service.PostReadService;
 import com.example.sns.domain.post.service.PostWriteService;
+import com.example.sns.util.CursorRequest;
+import com.example.sns.util.PageCursor;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,13 @@ public class PostController {
            Pageable pageable
     ) {
         return postReadService.getPosts(memberId, pageable);
+    }
+    @GetMapping("/members/{memberId}/by-cursor")
+    public PageCursor<Post> getPostsByCursur(
+            @PathVariable Long memberId,
+           CursorRequest cursorRequest
+    ) {
+        return postReadService.getPosts(memberId, cursorRequest);
     }
 
 
