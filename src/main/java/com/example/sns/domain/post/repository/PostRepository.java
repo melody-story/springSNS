@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -50,7 +49,7 @@ public class PostRepository {
                 SELECT memberId, createdDate, count(id) as cnt
                 FROM %s
                 WHERE memberId = :memberId and createdDate between :firstDate and :lastDate
-                GROUP BY memberId, createdDate
+                GROUP BY memberId, createdDate;
                 """, TABLE);
         var params = new BeanPropertySqlParameterSource(request);
         return namedParameterJdbcTemplate.query(sql,params,DAILY_POST_COUNT_MAPPER);
@@ -67,7 +66,7 @@ public class PostRepository {
                 WHERE memberId = :memberId
                 ORDER BY %s
                 LIMIT :size
-                OFFSET :offset
+                OFFSET :offset;
                 """, TABLE, PageHelper.orderBy(pageable.getSort()));
         var posts = namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
         return new PageImpl(posts, pageable,getCount(memberId));
@@ -77,7 +76,7 @@ public class PostRepository {
         var sql = String.format("""
                 SELECT count(id)
                 FROM %s
-                WHERE memberID = :memberId
+                WHERE memberID = :memberId;
                 """,TABLE);
        var params = new MapSqlParameterSource().addValue("memberId", memberId);
        return namedParameterJdbcTemplate.queryForObject(sql, params,Long.class);
@@ -92,10 +91,26 @@ public class PostRepository {
                 FROM %s
                 WHERE memberId = :memberId
                 ORDER BY id DESC
-                LIMIT :size
+                LIMIT :size;
                 """,TABLE);
         var params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
+                .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+    }
+    public List<Post> findAllByInMemberIdAndOrderByIdDesc(List<Long> memberIds , int size) {
+        if (memberIds.isEmpty()) {
+            return List.of();
+        }
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds)
+                ORDER BY id DESC
+                LIMIT :size;
+                """,TABLE);
+        var params = new MapSqlParameterSource()
+                .addValue("memberIds", memberIds)
                 .addValue("size", size);
         return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
     }
@@ -109,10 +124,27 @@ public class PostRepository {
                 FROM %s
                 WHERE memberId = :memberId and id < :id
                 ORDER BY id DESC
-                LIMIT :size
+                LIMIT :size;
                 """,TABLE);
         var params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
+                .addValue("id", id)
+                .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+    }
+  public List<Post> findAllByLessThanIdAndInMemberIdAndOrderByIdDesc(Long id, List<Long> memberIds, int size) {
+        /*
+         키가 있을 때
+         */
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds) and id < :id
+                ORDER BY id desc
+                LIMIT :size;
+                """,TABLE);
+        var params = new MapSqlParameterSource()
+                .addValue("memberIds", memberIds)
                 .addValue("id", id)
                 .addValue("size", size);
         return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
@@ -128,7 +160,7 @@ public class PostRepository {
     public void bulkInsert(List<Post> posts){
         var sql = String.format("""
             INSERT INTO `%s` (memberId, contents, createdDate, createdAt)
-            VALUES (:memberId, :contents, :createdDate, :createdAt)
+            VALUES (:memberId, :contents, :createdDate, :createdAt);
             """, TABLE);
 
         SqlParameterSource[] params = posts
