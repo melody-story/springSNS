@@ -3,8 +3,9 @@ package com.example.sns.application.usacase;
 import com.example.sns.domain.follow.entity.Follow;
 import com.example.sns.domain.follow.service.FollowReadService;
 import com.example.sns.domain.post.entity.Post;
-import com.example.sns.domain.post.repository.PostRepository;
+import com.example.sns.domain.post.entity.Timeline;
 import com.example.sns.domain.post.service.PostReadService;
+import com.example.sns.domain.post.service.TimelineReadService;
 import com.example.sns.util.CursorRequest;
 import com.example.sns.util.PageCursor;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class GetTimeLinePostsUsacase {
 
     private final PostReadService postReadService;
     private final FollowReadService followReadService;
+    private final TimelineReadService timelineReadService;
 
     public PageCursor<Post> execute(Long memberId, CursorRequest cursorRequest) {
        /*
@@ -47,9 +49,13 @@ public class GetTimeLinePostsUsacase {
             1. Timeline 테이블 조회
             2. 1번에 해당하는 게시물을 조회
          */
-        List<Follow> followings = followReadService.getFollowings(memberId);
-        List<Long> followingMemberIds = followings.stream().map(Follow::getToMemberId).toList();
-        return postReadService.getPosts(followingMemberIds, cursorRequest);
+        // List<Follow> followings = followReadService.getFollowings(memberId);
+        var pagedTimelines = timelineReadService.getTimelines(memberId, cursorRequest);
+        // List<Long> followingMemberIds = followings.stream().map(Follow::getToMemberId).toList();
+        List<Long> postIds = pagedTimelines.body().stream().map(Timeline::getPostId).toList();
+        // return postReadService.getPosts(followingMemberIds, cursorRequest);
+        List<Post> posts = postReadService.getPosts(postIds);
+        return new PageCursor(pagedTimelines.nextCursorRequest(), posts);
     }
 
 }

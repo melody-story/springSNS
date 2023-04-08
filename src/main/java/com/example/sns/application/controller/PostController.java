@@ -1,5 +1,6 @@
 package com.example.sns.application.controller;
 
+import com.example.sns.application.usacase.CreatePostUsecase;
 import com.example.sns.application.usacase.GetTimeLinePostsUsacase;
 import com.example.sns.domain.post.dto.DailyPostCount;
 import com.example.sns.domain.post.dto.DailyPostCountRequest;
@@ -12,7 +13,6 @@ import com.example.sns.util.PageCursor;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +25,11 @@ public class PostController {
     private final PostWriteService postWriteService;
     private final PostReadService postReadService;
     private final GetTimeLinePostsUsacase getTimeLinePostsUsacase;
+    private final CreatePostUsecase createPostUsecase;
+
     @PostMapping("")
     public Long create(PostCommand command) {
-        return postWriteService.create(command);
+         return createPostUsecase.execute(command);
     }
 
     @GetMapping("/daily-post-counts")
@@ -55,7 +57,7 @@ public class PostController {
             @PathVariable Long memberId,
            CursorRequest cursorRequest
     ) {
-        return getTimeLinePostsUsacase.execute(memberId, cursorRequest);
+        return getTimeLinePostsUsacase.executeByTimeline(memberId, cursorRequest);
     }
 
 

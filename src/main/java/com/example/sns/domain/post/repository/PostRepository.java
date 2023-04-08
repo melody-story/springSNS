@@ -1,9 +1,9 @@
 package com.example.sns.domain.post.repository;
 
-import com.example.sns.util.PageHelper;
 import com.example.sns.domain.post.dto.DailyPostCount;
 import com.example.sns.domain.post.dto.DailyPostCountRequest;
 import com.example.sns.domain.post.entity.Post;
+import com.example.sns.util.PageHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,61 +25,60 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostRepository {
     static final String TABLE = "Post";
+    private static final RowMapper<Post> ROW_MAPPER = (ResultSet resultSet, int rowNum)
+        -> Post.builder()
+        .id(resultSet.getLong("id"))
+        .memberId(resultSet.getLong("memberId"))
+        .contents(resultSet.getString("contents"))
+        .createdDate(resultSet.getObject("createdDate", LocalDate.class))
+        .createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
+        .build();
+
+    private static final RowMapper<DailyPostCount> DAILY_POST_COUNT_MAPPER = (ResultSet resultSet, int rowNum) ->
+        new DailyPostCount(
+            resultSet.getLong("memberId"),
+            resultSet.getObject("createdDate", LocalDate.class),
+            resultSet.getLong("cnt")
+        );
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private static final RowMapper<Post> ROW_MAPPER = (ResultSet resultSet, int rowNum)
-            -> Post.builder()
-            .id(resultSet.getLong("id"))
-            .memberId(resultSet.getLong("memberId"))
-            .contents(resultSet.getString("contents"))
-            .createdDate(resultSet.getObject("createdDate",LocalDate.class))
-            .createdAt(resultSet.getObject("createdAt",LocalDateTime.class))
-            .build();
-
-    private static final RowMapper<DailyPostCount> DAILY_POST_COUNT_MAPPER = (ResultSet resultSet, int rowNum) ->
-            new DailyPostCount(
-                    resultSet.getLong("memberId"),
-                    resultSet.getObject("createdDate", LocalDate.class),
-                    resultSet.getLong("cnt")
-            );
-
     public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
         var sql = String.format("""
-                SELECT memberId, createdDate, count(id) as cnt
-                FROM %s
-                WHERE memberId = :memberId and createdDate between :firstDate and :lastDate
-                GROUP BY memberId, createdDate;
-                """, TABLE);
+            SELECT memberId, createdDate, count(id) as cnt
+            FROM %s
+            WHERE memberId = :memberId and createdDate between :firstDate and :lastDate
+            GROUP BY memberId, createdDate;
+            """, TABLE);
         var params = new BeanPropertySqlParameterSource(request);
-        return namedParameterJdbcTemplate.query(sql,params,DAILY_POST_COUNT_MAPPER);
+        return namedParameterJdbcTemplate.query(sql, params, DAILY_POST_COUNT_MAPPER);
     }
 
     public Page<Post> findAllByMemberId(Long memberId, Pageable pageable) {
         var params = new MapSqlParameterSource()
-                .addValue("memberId", memberId)
-                .addValue("size", pageable.getPageSize())
-                .addValue("offset", pageable.getOffset());
+            .addValue("memberId", memberId)
+            .addValue("size", pageable.getPageSize())
+            .addValue("offset", pageable.getOffset());
         var sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY %s
-                LIMIT :size
-                OFFSET :offset;
-                """, TABLE, PageHelper.orderBy(pageable.getSort()));
-        var posts = namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
-        return new PageImpl(posts, pageable,getCount(memberId));
+            SELECT *
+            FROM %s
+            WHERE memberId = :memberId
+            ORDER BY %s
+            LIMIT :size
+            OFFSET :offset;
+            """, TABLE, PageHelper.orderBy(pageable.getSort()));
+        var posts = namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
+        return new PageImpl(posts, pageable, getCount(memberId));
     }
 
     private Long getCount(Long memberId) {
         var sql = String.format("""
-                SELECT count(id)
-                FROM %s
-                WHERE memberID = :memberId;
-                """,TABLE);
-       var params = new MapSqlParameterSource().addValue("memberId", memberId);
-       return namedParameterJdbcTemplate.queryForObject(sql, params,Long.class);
+            SELECT count(id)
+            FROM %s
+            WHERE memberID = :memberId;
+            """, TABLE);
+        var params = new MapSqlParameterSource().addValue("memberId", memberId);
+        return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
     public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
@@ -87,32 +86,47 @@ public class PostRepository {
          커서 방식에서는 사용하는 키와 정렬순서를 명시해주어야한다.
          */
         var sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId
-                ORDER BY id DESC
-                LIMIT :size;
-                """,TABLE);
+            SELECT *
+            FROM %s
+            WHERE memberId = :memberId
+            ORDER BY id DESC
+            LIMIT :size;
+            """, TABLE);
         var params = new MapSqlParameterSource()
-                .addValue("memberId", memberId)
-                .addValue("size", size);
-        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+            .addValue("memberId", memberId)
+            .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
-    public List<Post> findAllByInMemberIdAndOrderByIdDesc(List<Long> memberIds , int size) {
+
+    public List<Post> findAllByInMemberIdAndOrderByIdDesc(List<Long> memberIds, int size) {
         if (memberIds.isEmpty()) {
             return List.of();
         }
         var sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds)
-                ORDER BY id DESC
-                LIMIT :size;
-                """,TABLE);
+            SELECT *
+            FROM %s
+            WHERE memberId in (:memberIds)
+            ORDER BY id DESC
+            LIMIT :size;
+            """, TABLE);
         var params = new MapSqlParameterSource()
-                .addValue("memberIds", memberIds)
-                .addValue("size", size);
-        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+            .addValue("memberIds", memberIds)
+            .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByInId(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        var sql = String.format("""
+            SELECT *
+            FROM %s
+            WHERE id in (:ids)
+            """, TABLE);
+        var params = new MapSqlParameterSource()
+            .addValue("ids", ids);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 
     public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
@@ -120,34 +134,35 @@ public class PostRepository {
          키가 있을 때
          */
         var sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId = :memberId and id < :id
-                ORDER BY id DESC
-                LIMIT :size;
-                """,TABLE);
+            SELECT *
+            FROM %s
+            WHERE memberId = :memberId and id < :id
+            ORDER BY id DESC
+            LIMIT :size;
+            """, TABLE);
         var params = new MapSqlParameterSource()
-                .addValue("memberId", memberId)
-                .addValue("id", id)
-                .addValue("size", size);
-        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+            .addValue("memberId", memberId)
+            .addValue("id", id)
+            .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
-  public List<Post> findAllByLessThanIdAndInMemberIdAndOrderByIdDesc(Long id, List<Long> memberIds, int size) {
+
+    public List<Post> findAllByLessThanIdAndInMemberIdAndOrderByIdDesc(Long id, List<Long> memberIds, int size) {
         /*
          키가 있을 때
          */
         var sql = String.format("""
-                SELECT *
-                FROM %s
-                WHERE memberId in (:memberIds) and id < :id
-                ORDER BY id desc
-                LIMIT :size;
-                """,TABLE);
+            SELECT *
+            FROM %s
+            WHERE memberId in (:memberIds) and id < :id
+            ORDER BY id desc
+            LIMIT :size;
+            """, TABLE);
         var params = new MapSqlParameterSource()
-                .addValue("memberIds", memberIds)
-                .addValue("id", id)
-                .addValue("size", size);
-        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+            .addValue("memberIds", memberIds)
+            .addValue("id", id)
+            .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
 
     }
 
@@ -157,32 +172,32 @@ public class PostRepository {
         throw new UnsupportedOperationException("Post는 갱신을 지원하지 않습니다");
     }
 
-    public void bulkInsert(List<Post> posts){
+    public void bulkInsert(List<Post> posts) {
         var sql = String.format("""
             INSERT INTO `%s` (memberId, contents, createdDate, createdAt)
             VALUES (:memberId, :contents, :createdDate, :createdAt);
             """, TABLE);
 
         SqlParameterSource[] params = posts
-                .stream()
-                .map(BeanPropertySqlParameterSource::new)
-                .toArray(SqlParameterSource[]::new);
+            .stream()
+            .map(BeanPropertySqlParameterSource::new)
+            .toArray(SqlParameterSource[]::new);
         namedParameterJdbcTemplate.batchUpdate(sql, params);
     }
 
     private Post insert(Post post) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate())
-                .withTableName(TABLE)
-                .usingGeneratedKeyColumns("id");
+            .withTableName(TABLE)
+            .usingGeneratedKeyColumns("id");
 
         SqlParameterSource params = new BeanPropertySqlParameterSource(post);
         var id = jdbcInsert.executeAndReturnKey(params).longValue();
         return Post.builder()
-                .id(id)
-                .memberId(post.getMemberId())
-                .contents(post.getContents())
-                .createdDate(post.getCreatedDate())
-                .createdAt(post.getCreatedAt())
-                .build();
+            .id(id)
+            .memberId(post.getMemberId())
+            .contents(post.getContents())
+            .createdDate(post.getCreatedDate())
+            .createdAt(post.getCreatedAt())
+            .build();
     }
 }
