@@ -2,7 +2,6 @@ package com.example.sns.domain.follow.repository;
 
 import com.example.sns.domain.follow.entity.Follow;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -36,6 +35,11 @@ public class FollowRepository {
         return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
     }
 
+    public List<Follow> findAllByToMemberId(Long toMemberId) {
+        String sql = String.format("SELECT * FROM %s WHERE toMemberId = :toMemberId", TABLE);
+        MapSqlParameterSource params = new MapSqlParameterSource().addValue("toMemberId", toMemberId);
+        return namedParameterJdbcTemplate.query(sql,params,ROW_MAPPER);
+    }
 
     public Follow save(Follow follow) {
         if (follow.getId() == null)
