@@ -7,6 +7,8 @@ import com.example.sns.domain.member.repository.MemberNicknameHistoryRepository;
 import com.example.sns.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +17,19 @@ public class MemberWriteService {
     private final MemberRepository memberRepository;
     private final MemberNicknameHistoryRepository memberNicknameHistoryRepository;
 
+    /*
+    * 트랜잭션
+    * 1. @Transaction 어노테이션 샤용
+    *  : proxy 패턴으로 동작하기 때문에 inner함수에 선언된 transaction은 작동하지 않는다.
+    * 2. TransactionTemplate 사용
+    * 3. sql query에 저굥ㅇ
+    * " START TRANSACTION;
+    * COMMIT;
+    * "
+    *
+    * */
+
+    @Transactional // 1. 선언
     public Member create(RegisterMemberCommand command){
         /*
          요구사항
