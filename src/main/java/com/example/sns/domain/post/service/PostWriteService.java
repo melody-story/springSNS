@@ -28,4 +28,11 @@ public class PostWriteService {
         post.incrementLikeCount();
          postRepository.save(post);
     }
+
+    public void likePostByOptimisticLock (Long postId) {
+        //게시물 조회후 like 업데이트
+        var post = postRepository.findById(postId, false).orElseThrow();
+        post.incrementLikeCount();
+        postRepository.save(post);
+    }
 }
