@@ -94,7 +94,7 @@ public class PostRepository {
         var sql = String.format("""
             SELECT count(id)
             FROM %s
-            WHERE memberID = :memberId;
+            WHERE memberId = :memberId;
             """, TABLE);
         var params = new MapSqlParameterSource().addValue("memberId", memberId);
         return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
